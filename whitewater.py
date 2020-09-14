@@ -55,4 +55,35 @@ fig.update_layout(
     title_text = 'Whitewater Accidents by State', # Create a Title
     geo_scope='usa',  # Plot only the USA instead of globe
 )
-fig.show()  # Output the plot to the screen
+fig.show()
+#colorado has the highest number of whitewater Accidents
+# Output the plot to the screen
+
+#visualize years
+count_date = pd.DataFrame(whitewater_accidents_us['accidentdate'].value_counts()).reset_index()
+count_date = count_date.rename(columns={"index": "date","accidentdate": "count"})
+count_date['date']=pd.to_datetime(count_date.date)
+count_date = count_date[(count_date['date'] > '1980-01-01') & (count_date['date'] < '2020-09-14')]
+count_date = count_date.sort_values(['date'])
+count_date
+
+
+#plot
+fig = px.line(count_date, x='date', y="count")
+fig.show()
+
+### import datetime as dt
+whitewater_accidents['accidentdate'] = pd.to_datetime(whitewater_accidents['accidentdate'])
+whitewater_accidents[(whitewater_accidents['accidentdate'] > '1990-06-01') &
+                     (whitewater_accidents['accidentdate'] < '1990-06-30')]
+#there were just a lot of accidents in June 1990, no one single event with more than 1 victim
+
+fig = px.histogram(whitewater_accidents, x="age")
+#babies don't go on whitewater very often, it must be that 0 was imputed for unknown ages
+fig.show()
+
+##### visualize age of victims
+
+fig = px.histogram(whitewater_accidents, x="age", range_x = (5,80), nbins = 20)
+fig.show()
+#25-29 most deaths
