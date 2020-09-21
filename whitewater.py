@@ -23,6 +23,7 @@ import plotly.express as px
 import os
 import chart_studio
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 
 
 # In[2]:
@@ -154,6 +155,12 @@ trainingData = whitewater_accidents.iloc[:, :].values
 dataset = whitewater_accidents.iloc[:, :].values
 
 
+# In[ ]:
+
+
+
+
+
 # In[17]:
 
 
@@ -175,32 +182,38 @@ whitewater_accidents['age'] = whitewater_accidents['age'].fillna(method='ffill')
 
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
 # In[19]:
+
+
+whitewater_accidents
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[20]:
 
 
 whitewater_accidents.isna().sum()
 
 
-# In[20]:
+# In[21]:
 
 
 whitewater_accidents.dropna(subset=['age'],inplace = True)
 whitewater_accidents.info()
 
 
-# In[21]:
+# In[22]:
 
 
 ##### visualize age of victims
@@ -211,13 +224,13 @@ fig.show()
 #25-29 most deaths
 
 
-# In[22]:
+# In[23]:
 
 
 whitewater_accidents['type'].value_counts()
 
 
-# In[23]:
+# In[24]:
 
 
 # Create a list to store the data
@@ -238,7 +251,7 @@ for row in whitewater_accidents['type']:
         # Append a letter grade
         death.append(0)
     else:
-        death.append('NA')
+        death.append(0)
 
 
 # Create a column from the list
@@ -247,7 +260,7 @@ whitewater_accidents['death'] = death
 whitewater_accidents
 
 
-# In[24]:
+# In[25]:
 
 
 # Create a list to store the data
@@ -309,13 +322,13 @@ whitewater_accidents['numeric_difficulty'] = numeric_difficulty
 whitewater_accidents
 
 
-# In[25]:
+# In[26]:
 
 
 whitewater_accidents['death'].value_counts()
 
 
-# In[26]:
+# In[27]:
 
 
 count_deaths = len(whitewater_accidents[whitewater_accidents['death']==0])
@@ -326,13 +339,25 @@ pct_of_death = count_deaths/(count_no_death+count_deaths)
 print("percentage of deaths", pct_of_death*100)
 
 
-# In[27]:
+# In[28]:
 
 
 whitewater_accidents['age'].isna().sum()
 
 
-# In[32]:
+# In[ ]:
+
+
+
+
+
+# In[29]:
+
+
+whitewater_accidents['month'] = pd.DatetimeIndex(whitewater_accidents['accidentdate']).month
+
+
+# In[30]:
 
 
 # Import label encoder
@@ -353,11 +378,14 @@ whitewater_accidents['privcomm'] = label_encoder.fit_transform(whitewater_accide
 
 #state
 whitewater_accidents['state'] = whitewater_accidents['state'].astype(str)
-whitewater_accidents['state'] = label_encoder.fit_transform(whitewater_accidents['privcomm'])
+whitewater_accidents['state'] = label_encoder.fit_transform(whitewater_accidents['state'])
 
 #age
 whitewater_accidents['age'] = whitewater_accidents['age'].astype(int)
 whitewater_accidents['age'] = label_encoder.fit_transform(whitewater_accidents['age'])
+
+#age
+whitewater_accidents['death'] = whitewater_accidents['death'].astype(int)
 
 
 
@@ -370,10 +398,93 @@ whitewater_accidents['encoded_difficulty'] = label_encoder.fit_transform(whitewa
 '''
 
 
+# In[31]:
+
+
+whitewater_accidents.info()
+
+
+# In[32]:
+
+
+whitewater_numeric_columns = whitewater_accidents[['age','privcomm','cause','month','encoded_experience','death']]
+
+
 # In[33]:
 
 
-whitewater_accidents.columns
+whitewater_numeric_columns
 
 
-# In[ ]:
+# In[34]:
+
+
+pd.crosstab(whitewater_numeric_columns.month,whitewater_numeric_columns.death).plot(kind='bar')
+plt.title('Frequency of Deaths by Month')
+plt.xlabel('Month')
+plt.ylabel('Frequency of Death')
+
+
+# In[35]:
+
+
+whitewater_numeric_columns = whitewater_numeric_columns.rename(columns ={"death": "y"})
+
+
+# In[51]:
+
+
+X = whitewater_numeric_columns.drop('y', axis = 1)
+y = whitewater_numeric_columns['y']
+
+
+# In[52]:
+
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+columns = X_train.columns
+
+
+# In[53]:
+
+
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
+logreg = LogisticRegression()
+logreg.fit(X_train, y_train)
+
+
+# In[54]:
+
+
+import statsmodels.api as sm
+logit_model=sm.Logit(y,X)
+result=logit_model.fit()
+print(result.summary2())
+
+
+# In[56]:
+
+
+logreg = LogisticRegression()
+logreg.fit(X_train, y_train)
+y_pred = logreg.predict(X_test)
+print('Accuracy of logistic regression classifier on test set:{:.2f}'.format(logreg.score(X_test, y_test)))
+
+
+# In[57]:
+
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix = confusion_matrix(y_test, y_pred)
+print(confusion_matrix)
+
+
+# The result is telling us that we have 89+463 correct predictions and 23+181 incorrect predictions
+
+# In[58]:
+
+
+from sklearn.metrics import classification_report
+print(classification_report(y_test, y_pred))
