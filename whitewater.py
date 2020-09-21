@@ -154,17 +154,25 @@ trainingData = whitewater_accidents.iloc[:, :].values
 dataset = whitewater_accidents.iloc[:, :].values
 
 
-# In[25]:
+# In[17]:
+
+
+whitewater_accidents['age'] = whitewater_accidents['age'].fillna(method='ffill')
+whitewater_accidents.info()
+
+
+# In[18]:
 
 
 
 fig = px.histogram(whitewater_accidents, x="age")
-
 fig.show()
 #impute Nan for 0
 #babies don't go on whitewater very often, it must be that 0 was imputed for unknown ages
-cols = ["age"]
-whitewater_accidents[cols] = whitewater_accidents[cols].replace({'0':np.nan, 0:np.nan})
+cols=['age']
+whitewater_accidents[cols] = whitewater_accidents[cols].replace({0:np.nan, 0:np.nan})
+whitewater_accidents['age'] = whitewater_accidents['age'].fillna(method='ffill')
+
 
 
 # In[ ]:
@@ -173,28 +181,26 @@ whitewater_accidents[cols] = whitewater_accidents[cols].replace({'0':np.nan, 0:n
 
 
 
-# In[26]:
+# In[ ]:
 
 
 
-whitewater_accidents['age'] = whitewater_accidents['age'].fillna(method='ffill')
-whitewater_accidents.info()
 
 
-# In[28]:
+# In[19]:
 
 
 whitewater_accidents.isna().sum()
 
 
-# In[30]:
+# In[20]:
 
 
 whitewater_accidents.dropna(subset=['age'],inplace = True)
 whitewater_accidents.info()
 
 
-# In[31]:
+# In[21]:
 
 
 ##### visualize age of victims
@@ -205,13 +211,13 @@ fig.show()
 #25-29 most deaths
 
 
-# In[32]:
+# In[22]:
 
 
 whitewater_accidents['type'].value_counts()
 
 
-# In[33]:
+# In[23]:
 
 
 # Create a list to store the data
@@ -241,7 +247,7 @@ whitewater_accidents['death'] = death
 whitewater_accidents
 
 
-# In[35]:
+# In[24]:
 
 
 # Create a list to store the data
@@ -303,13 +309,13 @@ whitewater_accidents['numeric_difficulty'] = numeric_difficulty
 whitewater_accidents
 
 
-# In[ ]:
+# In[25]:
 
 
 whitewater_accidents['death'].value_counts()
 
 
-# In[ ]:
+# In[26]:
 
 
 count_deaths = len(whitewater_accidents[whitewater_accidents['death']==0])
@@ -320,13 +326,13 @@ pct_of_death = count_deaths/(count_no_death+count_deaths)
 print("percentage of deaths", pct_of_death*100)
 
 
-# In[ ]:
+# In[27]:
 
 
 whitewater_accidents['age'].isna().sum()
 
 
-# In[ ]:
+# In[32]:
 
 
 # Import label encoder
@@ -355,18 +361,16 @@ whitewater_accidents['age'] = label_encoder.fit_transform(whitewater_accidents['
 
 
 
+
 '''
-
-
 #difficulty
 whitewater_accidents['numeric_difficulty'] = whitewater_accidents['numeric_difficulty'].astype(int)
 whitewater_accidents['encoded_difficulty'] = label_encoder.fit_transform(whitewater_accidents['numeric_difficulty'])
 
-
 '''
 
 
-# In[ ]:
+# In[33]:
 
 
 whitewater_accidents.columns
